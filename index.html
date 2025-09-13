@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import re
+
+app = FastAPI()
+
+# Allow React app (running on localhost:3000) to access backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class ChatRequest(BaseModel):
+    message: str
+
+campus_info = {
+    "schedules": {
+        "classes": "Classes run Monday to Friday, 8am to 6pm. Check your department website for specific timetables.",
+        "exams": "Final exams are scheduled from Dec 1 to Dec 15.",
+        "events": "Upcoming event: Fall Career Fair on October 20th, 10am - 4pm at the Student Center."
+    },
+    "facilities": {
+        "gym": "The gym is open 6am to 10pm daily. Membership required.",
+        "labs": "Computer labs are available in Building A, open 8am to 8pm.",
+        "study rooms": "Study rooms can be booked online via the campus portal."
+    },
+    "dining": {
+        "cafeteria": "The main cafeteria is open 7am to 7pm. Today's menu includes sandwiches, salads, and pasta.",
+        "coffee shop": "Campus Coffee Shop serves coffee and snacks from 8am to 5pm."
+    },
+    "library": {
+        "hours": "The library is open 8am to midnight on weekdays, 10am to 6pm on weekends.",
+        "borrowing": "You can borrow up to 5 books for 3 weeks.",
+        "spaces": "Quiet study areas and group rooms are available on the 2nd and 3rd floors."
+    },
+    "administration": {
+        "admissions": "Admissions office is open 9am to 5pm. You can apply online via the campus website.",
+        "fees": "Tuition fees can be paid online or at the administration office.",
+        "transcripts": "Request transcripts via the student portal or in person at the admin office."
+    }
+}
+
+def generate_response(user_input: str) -> str:
+    user_input = user_input.lower()
+
+    # Check for categories and keywords
+    if re.search(r"(class|schedule|timetable|exam|event)", user_input):
+        for key, info in campus_info["schedules"].items():
+            if key in user_input or key[:-1] in user_input:
+                return info
+        return "Please specify if you want information about classes, exams, or events."
+
+    elif re.search(r"(facility|gym|lab|study room|room)", user_input):
+        for key, info in campus_info["facilities"].items():
+            if key.replace("_", " ") in user_input:
+                return info
+        return "Which facility are you interested in? Gym, labs, or study rooms?"
+
+    elif re.search(r"(dining|cafeteria|food|coffee|menu)", user_input):
+        for key, info in campus_info["dining"].items():
+            if key in user_input:
+                return info
+        return "Are you asking about the cafeteria or the coffee shop?"
+
+    elif re.search(r"(library|book|borrow|study space|hours|library hours|study spaces)", user_input):
+        for key, info in campus_info["library"].items():
+            if key in user_input or key.replace("_", " ") in user_input:
+                return info
+        return "Do you want to know about library hours, borrowing, or study spaces?"
+
+    elif re.search(r"(admission|fees|tuition|transcript|administration|admin)", user_input):
+        for key, info in campus_info["administration"].items():
+            if key in user_input or key.replace("_", " ") in user_input:
+                return info
+        return "Are you asking about admissions, fees, or transcripts?"
+
+    else:
+        return "Sorry, I didn't understand that. Please ask about schedules, facilities, dining, library, or administration."
+
+@app.post("/chat")
+async def chat_endpoint(chat_request: ChatRequest):
+    user_message = chat_request.message
+    response = generate_response(user_message)
+    return {"response": response}
+, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    import React, { useState } from "react";
+
+function App() {
+  const [messages, setMessages] = useState([
+    { from: "bot", text: "Hi! Ask me about campus schedules, facilities, dining, library services, or administrative procedures." },
+  ]);
+  const [input, setInput] = useState("");
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = input.trim();
+    setMessages((msgs) => [...msgs, { from: "user", text: userMessage }]);
+    setInput("");
+
+    try {
+      const res = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage }),
+      });
+      const data = await res.json();
+      setMessages((msgs) => [...msgs, { from: "bot", text: data.response }]);
+    } catch (error) {
+      setMessages((msgs) => [...msgs, { from: "bot", text: "Sorry, I couldn't reach the server." }]);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 600, margin: "20px auto", fontFamily: "Arial, sans-serif" }}>
+      <h1>Campus Info Chatbot</h1>
+      <div style={{ border: "1px solid #ccc", padding: 10, minHeight: 400, overflowY: "auto" }}>
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            style={{
+              textAlign: msg.from === "bot" ? "left" : "right",
+              margin: "10px 0"
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                padding: "10px 15px",
+                borderRadius: 20,
+                backgroundColor: msg.from === "bot" ? "#eee" : "#007bff",
+                color: msg.from === "bot" ? "#000" : "#fff",
+                maxWidth: "80%"
+              }}
+            >
+              {msg.text}
+            </span>
+          </div>
+        ))}
+      </div>
+      <input
+        type="text"
+        placeholder="Type your message..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyPress={handleKeyPress}
+        style={{ width: "100%", padding: 10, fontSize: 16, marginTop: 10 }}
+      />
+      <button onClick={sendMessage} style={{ marginTop: 10, padding: "10px 20px", fontSize: 16 }}>
+        Send
+      </button>
+    </div>
+  );
+}
+
+export default App;
+
+</body>
+</html>
