@@ -2,175 +2,462 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import re
-
-app = FastAPI()
-
-# Allow React app (running on localhost:3000) to access backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class ChatRequest(BaseModel):
-    message: str
-
-campus_info = {
-    "schedules": {
-        "classes": "Classes run Monday to Friday, 8am to 6pm. Check your department website for specific timetables.",
-        "exams": "Final exams are scheduled from Dec 1 to Dec 15.",
-        "events": "Upcoming event: Fall Career Fair on October 20th, 10am - 4pm at the Student Center."
-    },
-    "facilities": {
-        "gym": "The gym is open 6am to 10pm daily. Membership required.",
-        "labs": "Computer labs are available in Building A, open 8am to 8pm.",
-        "study rooms": "Study rooms can be booked online via the campus portal."
-    },
-    "dining": {
-        "cafeteria": "The main cafeteria is open 7am to 7pm. Today's menu includes sandwiches, salads, and pasta.",
-        "coffee shop": "Campus Coffee Shop serves coffee and snacks from 8am to 5pm."
-    },
-    "library": {
-        "hours": "The library is open 8am to midnight on weekdays, 10am to 6pm on weekends.",
-        "borrowing": "You can borrow up to 5 books for 3 weeks.",
-        "spaces": "Quiet study areas and group rooms are available on the 2nd and 3rd floors."
-    },
-    "administration": {
-        "admissions": "Admissions office is open 9am to 5pm. You can apply online via the campus website.",
-        "fees": "Tuition fees can be paid online or at the administration office.",
-        "transcripts": "Request transcripts via the student portal or in person at the admin office."
-    }
-}
-
-def generate_response(user_input: str) -> str:
-    user_input = user_input.lower()
-
-    # Check for categories and keywords
-    if re.search(r"(class|schedule|timetable|exam|event)", user_input):
-        for key, info in campus_info["schedules"].items():
-            if key in user_input or key[:-1] in user_input:
-                return info
-        return "Please specify if you want information about classes, exams, or events."
-
-    elif re.search(r"(facility|gym|lab|study room|room)", user_input):
-        for key, info in campus_info["facilities"].items():
-            if key.replace("_", " ") in user_input:
-                return info
-        return "Which facility are you interested in? Gym, labs, or study rooms?"
-
-    elif re.search(r"(dining|cafeteria|food|coffee|menu)", user_input):
-        for key, info in campus_info["dining"].items():
-            if key in user_input:
-                return info
-        return "Are you asking about the cafeteria or the coffee shop?"
-
-    elif re.search(r"(library|book|borrow|study space|hours|library hours|study spaces)", user_input):
-        for key, info in campus_info["library"].items():
-            if key in user_input or key.replace("_", " ") in user_input:
-                return info
-        return "Do you want to know about library hours, borrowing, or study spaces?"
-
-    elif re.search(r"(admission|fees|tuition|transcript|administration|admin)", user_input):
-        for key, info in campus_info["administration"].items():
-            if key in user_input or key.replace("_", " ") in user_input:
-                return info
-        return "Are you asking about admissions, fees, or transcripts?"
-
-    else:
-        return "Sorry, I didn't understand that. Please ask about schedules, facilities, dining, library, or administration."
-
-@app.post("/chat")
-async def chat_endpoint(chat_request: ChatRequest):
-    user_message = chat_request.message
-    response = generate_response(user_message)
-    return {"response": response}
-, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
-    import React, { useState } from "react";
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .chat-bubble-ai {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .typing-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-indigo-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">🎓</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Campus AI Assistant</h1>
+                        <p class="text-sm text-gray-600">Your 24/7 campus information companion</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+                    <span class="text-sm text-gray-600">Online</span>
+                </div>
+            </div>
+        </div>
+    </header>
 
-function App() {
-  const [messages, setMessages] = useState([
-    { from: "bot", text: "Hi! Ask me about campus schedules, facilities, dining, library services, or administrative procedures." },
-  ]);
-  const [input, setInput] = useState("");
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Quick Actions Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button onclick="sendQuickQuery('What are today\'s dining hall hours?')" class="w-full text-left p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-blue-600">🍽️</span>
+                                <span class="text-sm font-medium text-gray-700">Dining Hours</span>
+                            </div>
+                        </button>
+                        <button onclick="sendQuickQuery('Show me library hours and services')" class="w-full text-left p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors duration-200">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-green-600">📚</span>
+                                <span class="text-sm font-medium text-gray-700">Library Info</span>
+                            </div>
+                        </button>
+                        <button onclick="sendQuickQuery('What facilities are available on campus?')" class="w-full text-left p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors duration-200">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-purple-600">🏢</span>
+                                <span class="text-sm font-medium text-gray-700">Facilities</span>
+                            </div>
+                        </button>
+                        <button onclick="sendQuickQuery('How do I register for classes?')" class="w-full text-left p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors duration-200">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-orange-600">📋</span>
+                                <span class="text-sm font-medium text-gray-700">Registration</span>
+                            </div>
+                        </button>
+                        <button onclick="sendQuickQuery('Show me today\'s schedule')" class="w-full text-left p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors duration-200">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-red-600">📅</span>
+                                <span class="text-sm font-medium text-gray-700">My Schedule</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+                <!-- Campus Stats -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Campus Stats</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Students Online</span>
+                            <span class="font-semibold text-green-600">2,847</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Library Occupancy</span>
+                            <span class="font-semibold text-blue-600">67%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Dining Halls Open</span>
+                            <span class="font-semibold text-purple-600">4/5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    const userMessage = input.trim();
-    setMessages((msgs) => [...msgs, { from: "user", text: userMessage }]);
-    setInput("");
+            <!-- Chat Interface -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-lg h-[600px] flex flex-col">
+                    <!-- Chat Header -->
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
+                                <span class="text-white font-bold text-lg">🤖</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Campus Assistant</h3>
+                                <p class="text-sm text-gray-600">Ask me anything about campus life!</p>
+                            </div>
+                        </div>
+                    </div>
 
-    try {
-      const res = await fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-      });
-      const data = await res.json();
-      setMessages((msgs) => [...msgs, { from: "bot", text: data.response }]);
-    } catch (error) {
-      setMessages((msgs) => [...msgs, { from: "bot", text: "Sorry, I couldn't reach the server." }]);
-    }
-  };
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4">
+                        <div class="flex items-start space-x-3 fade-in">
+                            <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-white text-sm">🤖</span>
+                            </div>
+                            <div class="chat-bubble-ai text-white p-4 rounded-2xl rounded-tl-md max-w-md">
+                                <p class="text-sm">Hello! I'm your Campus AI Assistant. I can help you with schedules, dining options, library services, facilities, and administrative procedures. What would you like to know?</p>
+                            </div>
+                        </div>
+                    </div>
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      sendMessage();
-    }
-  };
-
-  return (
-    <div style={{ maxWidth: 600, margin: "20px auto", fontFamily: "Arial, sans-serif" }}>
-      <h1>Campus Info Chatbot</h1>
-      <div style={{ border: "1px solid #ccc", padding: 10, minHeight: 400, overflowY: "auto" }}>
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            style={{
-              textAlign: msg.from === "bot" ? "left" : "right",
-              margin: "10px 0"
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                padding: "10px 15px",
-                borderRadius: 20,
-                backgroundColor: msg.from === "bot" ? "#eee" : "#007bff",
-                color: msg.from === "bot" ? "#000" : "#fff",
-                maxWidth: "80%"
-              }}
-            >
-              {msg.text}
-            </span>
-          </div>
-        ))}
-      </div>
-      <input
-        type="text"
-        placeholder="Type your message..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyPress={handleKeyPress}
-        style={{ width: "100%", padding: 10, fontSize: 16, marginTop: 10 }}
-      />
-      <button onClick={sendMessage} style={{ marginTop: 10, padding: "10px 20px", fontSize: 16 }}>
-        Send
-      </button>
+                    <!-- Chat Input -->
+                    <div class="p-6 border-t border-gray-200">
+                        <div class="flex space-x-3">
+                            <input 
+                                type="text" 
+                                id="chatInput" 
+                                placeholder="Ask about schedules, dining, library, facilities, or procedures..."
+                                class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                                onkeypress="handleKeyPress(event)"
+                            >
+                            <button 
+                                onclick="sendMessage()" 
+                                class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 font-medium"
+                            >
+                                Send
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button onclick="sendQuickQuery('What\'s for lunch today?')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full text-gray-700 transition-colors duration-200">What's for lunch?</button>
+                            <button onclick="sendQuickQuery('Library study rooms available?')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full text-gray-700 transition-colors duration-200">Study rooms?</button>
+                            <button onclick="sendQuickQuery('Gym hours today?')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full text-gray-700 transition-colors duration-200">Gym hours?</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  );
-}
 
-export default App;
+    <script>
+        // Campus Database - Simulated comprehensive data
+        const campusDatabase = {
+            schedules: {
+                classes: [
+                    { course: "CS 101", time: "9:00 AM - 10:30 AM", location: "Tech Building 201", days: "MWF" },
+                    { course: "MATH 201", time: "11:00 AM - 12:30 PM", location: "Science Hall 105", days: "TTh" },
+                    { course: "ENG 102", time: "2:00 PM - 3:30 PM", location: "Liberal Arts 301", days: "MWF" }
+                ],
+                events: [
+                    { name: "Career Fair", date: "Today", time: "10:00 AM - 4:00 PM", location: "Student Union" },
+                    { name: "Guest Lecture", date: "Tomorrow", time: "7:00 PM", location: "Auditorium A" }
+                ]
+            },
+            dining: {
+                halls: [
+                    { name: "Main Dining Hall", hours: "7:00 AM - 9:00 PM", status: "Open", menu: ["Grilled Chicken", "Vegetarian Pasta", "Fresh Salad Bar"] },
+                    { name: "Campus Café", hours: "8:00 AM - 6:00 PM", status: "Open", menu: ["Sandwiches", "Coffee", "Pastries"] },
+                    { name: "Food Court", hours: "11:00 AM - 8:00 PM", status: "Open", menu: ["Pizza", "Asian Cuisine", "Burgers"] }
+                ]
+            },
+            library: {
+                hours: "24/7 (Reduced hours on weekends)",
+                services: ["Study Rooms", "Computer Lab", "Research Assistance", "Printing Services", "Group Study Areas"],
+                studyRooms: { available: 12, total: 20 },
+                computers: { available: 45, total: 60 }
+            },
+            facilities: {
+                recreation: [
+                    { name: "Fitness Center", hours: "5:00 AM - 11:00 PM", amenities: ["Cardio Equipment", "Weight Room", "Pool", "Basketball Courts"] },
+                    { name: "Student Union", hours: "6:00 AM - 12:00 AM", amenities: ["Meeting Rooms", "Game Room", "Food Court", "Study Spaces"] }
+                ],
+                academic: [
+                    { name: "Computer Labs", locations: ["Tech Building", "Library", "Science Hall"], hours: "24/7 access with ID" },
+                    { name: "Research Centers", count: 8, specialties: ["AI Lab", "Biology Research", "Chemistry Lab"] }
+                ]
+            },
+            administrative: {
+                procedures: {
+                    registration: "Online through student portal. Registration opens based on credit hours completed.",
+                    transcripts: "Request through Registrar's office or online portal. Processing time: 3-5 business days.",
+                    parking: "Purchase permits online or at Campus Safety office. Visitor parking available in designated areas.",
+                    housing: "Applications open in February for fall semester. Priority given to returning students."
+                },
+                offices: [
+                    { name: "Registrar", hours: "8:00 AM - 5:00 PM", location: "Admin Building 102" },
+                    { name: "Financial Aid", hours: "9:00 AM - 4:00 PM", location: "Admin Building 201" },
+                    { name: "Student Services", hours: "8:00 AM - 6:00 PM", location: "Student Union 150" }
+                ]
+            }
+        };
+
+        // AI Response Generator
+        function generateAIResponse(query) {
+            const lowerQuery = query.toLowerCase();
+            
+            // Schedule queries
+            if (lowerQuery.includes('schedule') || lowerQuery.includes('class') || lowerQuery.includes('today')) {
+                return formatScheduleResponse();
+            }
+            
+            // Dining queries
+            if (lowerQuery.includes('dining') || lowerQuery.includes('food') || lowerQuery.includes('lunch') || lowerQuery.includes('dinner') || lowerQuery.includes('eat')) {
+                return formatDiningResponse();
+            }
+            
+            // Library queries
+            if (lowerQuery.includes('library') || lowerQuery.includes('study') || lowerQuery.includes('book')) {
+                return formatLibraryResponse();
+            }
+            
+            // Facilities queries
+            if (lowerQuery.includes('facilities') || lowerQuery.includes('gym') || lowerQuery.includes('fitness') || lowerQuery.includes('recreation')) {
+                return formatFacilitiesResponse();
+            }
+            
+            // Administrative queries
+            if (lowerQuery.includes('register') || lowerQuery.includes('transcript') || lowerQuery.includes('parking') || lowerQuery.includes('housing') || lowerQuery.includes('admin')) {
+                return formatAdministrativeResponse(lowerQuery);
+            }
+            
+            // Default response with suggestions
+            return `I'd be happy to help! I can provide information about:
+            
+📅 **Schedules** - Class times, events, and academic calendar
+🍽️ **Dining** - Meal plans, dining hall hours, and menus  
+📚 **Library** - Hours, services, and study room availability
+🏢 **Facilities** - Gym, student union, labs, and recreation
+📋 **Administrative** - Registration, transcripts, parking, and housing
+
+What specific information would you like to know about?`;
+        }
+
+        function formatScheduleResponse() {
+            const classes = campusDatabase.schedules.classes;
+            const events = campusDatabase.schedules.events;
+            
+            let response = "📅 **Your Schedule Information:**\n\n**Today's Classes:**\n";
+            classes.forEach(cls => {
+                response += `• ${cls.course} - ${cls.time}\n  📍 ${cls.location}\n\n`;
+            });
+            
+            response += "**Upcoming Events:**\n";
+            events.forEach(event => {
+                response += `• ${event.name} - ${event.date} at ${event.time}\n  📍 ${event.location}\n\n`;
+            });
+            
+            return response;
+        }
+
+        function formatDiningResponse() {
+            const halls = campusDatabase.dining.halls;
+            let response = "🍽️ **Dining Information:**\n\n";
+            
+            halls.forEach(hall => {
+                response += `**${hall.name}**\n`;
+                response += `⏰ Hours: ${hall.hours}\n`;
+                response += `📍 Status: ${hall.status}\n`;
+                response += `🍴 Today's Menu: ${hall.menu.join(', ')}\n\n`;
+            });
+            
+            return response;
+        }
+
+        function formatLibraryResponse() {
+            const lib = campusDatabase.library;
+            return `📚 **Library Services:**
+
+⏰ **Hours:** ${lib.hours}
+
+🛠️ **Available Services:**
+${lib.services.map(service => `• ${service}`).join('\n')}
+
+📊 **Current Availability:**
+• Study Rooms: ${lib.studyRooms.available}/${lib.studyRooms.total} available
+• Computers: ${lib.computers.available}/${lib.computers.total} available
+
+Need help finding resources or booking a study room? I can guide you through the process!`;
+        }
+
+        function formatFacilitiesResponse() {
+            const facilities = campusDatabase.facilities;
+            let response = "🏢 **Campus Facilities:**\n\n**Recreation:**\n";
+            
+            facilities.recreation.forEach(facility => {
+                response += `**${facility.name}**\n`;
+                response += `⏰ Hours: ${facility.hours}\n`;
+                response += `🎯 Amenities: ${facility.amenities.join(', ')}\n\n`;
+            });
+            
+            response += "**Academic Facilities:**\n";
+            facilities.academic.forEach(facility => {
+                response += `• ${facility.name}\n`;
+                if (facility.locations) response += `  📍 Locations: ${facility.locations.join(', ')}\n`;
+                if (facility.hours) response += `  ⏰ ${facility.hours}\n`;
+                if (facility.specialties) response += `  🔬 Specialties: ${facility.specialties.join(', ')}\n`;
+                response += "\n";
+            });
+            
+            return response;
+        }
+
+        function formatAdministrativeResponse(query) {
+            const admin = campusDatabase.administrative;
+            let response = "📋 **Administrative Information:**\n\n";
+            
+            if (query.includes('register')) {
+                response += `**Registration Process:**\n${admin.procedures.registration}\n\n`;
+            } else if (query.includes('transcript')) {
+                response += `**Transcript Requests:**\n${admin.procedures.transcripts}\n\n`;
+            } else if (query.includes('parking')) {
+                response += `**Parking Information:**\n${admin.procedures.parking}\n\n`;
+            } else if (query.includes('housing')) {
+                response += `**Housing Applications:**\n${admin.procedures.housing}\n\n`;
+            } else {
+                response += "**Key Procedures:**\n";
+                Object.entries(admin.procedures).forEach(([key, value]) => {
+                    response += `• **${key.charAt(0).toUpperCase() + key.slice(1)}:** ${value}\n\n`;
+                });
+            }
+            
+            response += "**Office Hours:**\n";
+            admin.offices.forEach(office => {
+                response += `• ${office.name}: ${office.hours} (${office.location})\n`;
+            });
+            
+            return response;
+        }
+
+        function addMessage(content, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex items-start space-x-3 fade-in ${isUser ? 'justify-end' : ''}`;
+            
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="chat-bubble-user text-white p-4 rounded-2xl rounded-tr-md max-w-md">
+                        <p class="text-sm">${content}</p>
+                    </div>
+                    <div class="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="text-white text-sm">👤</span>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="text-white text-sm">🤖</span>
+                    </div>
+                    <div class="chat-bubble-ai text-white p-4 rounded-2xl rounded-tl-md max-w-2xl">
+                        <div class="text-sm whitespace-pre-line">${content}</div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'flex items-start space-x-3';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-sm">🤖</span>
+                </div>
+                <div class="bg-gray-200 p-4 rounded-2xl rounded-tl-md">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-500 rounded-full typing-indicator"></div>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full typing-indicator" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full typing-indicator" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, true);
+                input.value = '';
+                
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const response = generateAIResponse(message);
+                    addMessage(response);
+                }, 1000 + Math.random() * 1000);
+            }
+        }
+
+        function sendQuickQuery(query) {
+            document.getElementById('chatInput').value = query;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Focus input on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('chatInput').focus();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e5b501622c9f41',t:'MTc1Nzc0NjE5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
 
 </body>
 </html>
